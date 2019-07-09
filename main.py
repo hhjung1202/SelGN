@@ -8,7 +8,6 @@ import os
 import torch.backends.cudnn as cudnn
 import time
 import utils
-import pretrain
 import dataset
 import math
 
@@ -156,7 +155,7 @@ def dataset_selector(data):
     elif data == "mnistm":
         return dataset.MNIST_M_loader(img_size=args.img_size)
     elif data == "cifar10":
-        return dataset.cifar10_loader(img_size=args.img_size)
+        return dataset.cifar10_loader(args)
 
 def to_var(x, dtype):
     return Variable(x.type(dtype))
