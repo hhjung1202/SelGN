@@ -1,7 +1,0 @@
-Type, Epoch, Batch, loss, Percent
-Type, Epoch, Batch, loss, Percent
-Type, Epoch, Batch, loss, Percent
-Type, Epoch, Batch, loss, Percent
-Train, 0, 0, 2.310820, 2.3108, 10.16
-Train, 0, 10, 2.357480, 25.9957, 8.24
-Train, 0, 20, 2.336551, 49.6167, 8.63
