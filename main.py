@@ -13,7 +13,7 @@ import math
 
 
 parser = argparse.ArgumentParser(description='PyTorch Cycle Domain Adaptation Training')
-parser.add_argument('--sd', default='mnist', type=str, help='source dataset')
+parser.add_argument('--sd', default='cifar10', type=str, help='source dataset')
 parser.add_argument('--td', default='usps', type=str, help='target dataset')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N', help='number of data loading workers (default: 4)')
 parser.add_argument('--epoch', default=165, type=int, metavar='N', help='number of total epoch to run')
@@ -52,8 +52,10 @@ def main():
     utils.default_model_dir = args.dir
     start_time = time.time()
 
+    train_loader, test_loader, _, _ = dataset_selector(args.sd)
+
     state_info = utils.model_optim_state_info()
-    state_info.model_init(num_class=10, layer=args.layer)
+    state_info.model_init(num_class=10, index=args.layer)
     state_info.model_cuda_init()
     # state_info.weight_init()
     state_info.optimizer_init(args)
@@ -78,8 +80,8 @@ def main():
         for param_group in state_info.optimizer.param_groups:
             param_group['lr'] = lr
 
-        train(state_info, Target_train_loader, epoch)
-        test(state_info, Target_test_loader, Src_sample, Tgt_sample, epoch)
+        train(state_info, train_loader, epoch)
+        test(state_info, test_loader, epoch)
 
         filename = 'latest.pth.tar'
         utils.save_state_checkpoint(state_info, best_prec_result, filename, utils.default_model_dir, epoch)

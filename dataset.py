@@ -455,7 +455,7 @@ def cifar10_loader(args):
                                               batch_size=args.batch_size,
                                               shuffle=False,
                                               num_workers=4)
-    return train_loader, test_loader
+    return train_loader, test_loader, 3, 32
 
 
 def cifar100_loader():
@@ -494,4 +494,4 @@ def cifar100_loader():
                                               shuffle=False,
                                               num_workers=4)
 
-    return train_loader, test_loader
+    return train_loader, test_loader, 3, 32
