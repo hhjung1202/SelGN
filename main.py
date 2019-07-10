@@ -27,6 +27,8 @@ parser.add_argument('--img-size', type=int, default=32, help='input image width,
 parser.add_argument('--layer', type=int, default=0, help='layer size : 14, 20, 32, 44, 56, 110')
 parser.add_argument('--dir', default='./', type=str, help='default save directory')
 parser.add_argument('--gpu', default='0', type=str, help='Multi GPU ids to use.')
+parser.add_argument('--gn', type=int, default=0, help='GN use or not')
+parser.add_argument('--group', type=int, default=1, help='number of group at GN')
 
 
 source_prediction_max_result = []
@@ -55,7 +57,7 @@ def main():
     train_loader, test_loader, _, _ = dataset_selector(args.sd)
 
     state_info = utils.model_optim_state_info()
-    state_info.model_init(num_class=10, index=args.layer)
+    state_info.model_init(args=args, num_class=10)
     state_info.model_cuda_init()
     # state_info.weight_init()
     state_info.optimizer_init(args)
@@ -140,9 +142,8 @@ def test(state_info, test_loader, epoch):
         _, predicted = torch.max(output.data, 1)
         correct += float(predicted.eq(y.data).cpu().sum())
         
-        if it % 10 == 0:
-            utils.print_log('Test, {}, {}, {:.2f}'.format(epoch, it, 100.*correct / total))
-            print('Test, {}, {}, {:.2f}'.format(epoch, it, 100.*correct / total))
+    utils.print_log('Test, {}, {:.2f}'.format(epoch, 100.*correct / total))
+    print('Test, {}, {:.2f}'.format(epoch, 100.*correct / total))
     
     utils.print_log('')
 
