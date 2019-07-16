@@ -22,10 +22,7 @@ class model_optim_state_info(object):
 
     def model_init(self, args, num_class=10):
         layer = [14, 20, 32, 44, 56, 110]
-        GN = True
-        if args.gn == 0:
-            GN = False
-        self.model = ResNet(num_class=num_class, layer=layer[args.layer], GN=GN, group=args.group)
+        self.model = ResNet(num_class=num_class, layer=layer[args.layer], Method=args.Method, group=args.group, batch_size=args.batch_size)
 
     def forward(self, x, test=False):
         output = self.model(x)

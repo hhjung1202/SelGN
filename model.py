@@ -2,27 +2,120 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-def norm2d(out_channels, group, GN):
-    if GN:
+def norm2d(out_channels, group, Method, batch_size=None, width_height=None):
+    if Method == "GN":
         return nn.GroupNorm(group, out_channels)
-    else:
+    elif Method == "BN":
         return nn.BatchNorm2d(out_channels)
+    elif Method == "P1":
+        return Proposed_ver1(batch_size, group, out_channels)
+    elif Method == "P2":
+        return Proposed_ver2(width_height, group, out_channels)
+
+class GroupNorm(nn.Module):
+    def __init__(self, group, out_channels, eps=1e-5):
+        super(GroupNorm, self).__init__()
+        self.weight = nn.Parameter(torch.ones(1,out_channels,1,1))
+        self.bias = nn.Parameter(torch.zeros(1,out_channels,1,1))
+        self.group = group
+        self.eps = eps
+
+    def forward(self, x):
+        N,C,H,W = x.size()
+        G = self.group
+
+        ''' 
+        2가지 방법이 존재한다.
+            1번째 : Batch와 Channel을 Transpose 하여 Channel에 독립적으로 연산을 하며, 
+                서로 다른 Batch Image의 같은 위치의 Instance들을 모아서 어느 그룹에 속할 것인지를 결정한다.
+            단점 : 이전의 Group Norm이 경우 Batch의 size에 독립적으로 학습이 진행되는 반면 
+                이런식으로 진행하게 될 경우 Batch size가 결과에 영향을 미치게 된다.
+
+            2번째 : Batch와 Channel 모두 Batch로 밀어넣고, 오로지 Instance 만으로 어느 그룹에 속하는지를 결정하여 묶는다.
+            단점 : Batch size가 곱으로 늘어날 것이고, 성능이 나왔을 때 온전히 Group Norm과 비교하기 힘들다
+                (결국 Batch Norm처럼 Batch의 정보도 끌어다 쓰기 때문에)
+
+        '''
+
+        x = x.view(N,G,-1)
+        mean = x.mean(-1, keepdim=True)
+        var = x.var(-1, keepdim=True)
+
+        x = (x-mean) / (var+self.eps).sqrt()
+        x = x.view(N,C,H,W)
+        return x * self.weight + self.bias
+
+class Proposed_ver1(nn.Module):
+    def __init__(self, batch_size, group, out_channels, eps=1e-5):
+        super(Proposed_ver1, self).__init__()
+        self.weight = nn.Parameter(torch.ones(1,out_channels,1,1))
+        self.bias = nn.Parameter(torch.zeros(1,out_channels,1,1))
+        self.group = group
+        self.eps = eps
+        self.fc = nn.Linear(batch_size * 2, group)
+    def forward(self, x):
+        N,C,H,W = x.size()
+        x_ = torch.transpose(x,0,1).view(C, N, -1) # transpose 후 x_.size() == [C,N,H,W]
+        mean = x_.mean(-1, keepdim=True).squeeze(-1) # mean.size() == [C,N]
+        var = x_.var(-1, keepdim=True).squeeze(-1) # var.size() == [C,N]
+        s = torch.cat([mean, var], 1) # s.view() == [C, 2N]
+        s = F.softmax(self.fc(s), dim=1) # s.view() == [C, group]
+        _, s = torch.max(s.data, dim=1) # s.view() == [C], max Index data
+        arr = []
+        for i in range(self.group):
+            arr.append([])
+            arr[i] = [m for m, n in enumerate(s) if n == i]
+        for grp in arr:
+            if len(grp) is 0:
+                continue
+            box = x[:,grp].view(N,-1)
+            box_mean = box.mean(-1, keepdim=True).view(-1,1,1,1)
+            box_var = box.var(-1, keepdim=True).view(-1,1,1,1)
+            x[:,grp] = (x[:,grp] - box_mean) / (box_var + self.eps).sqrt()
+        return x * self.weight + self.bias
+
+class Proposed_ver2(nn.Module):
+    def __init__(self, width_height, group, out_channels, eps=1e-5):
+        super(Proposed_ver2, self).__init__()
+        self.weight = nn.Parameter(torch.ones(1,out_channels,1,1))
+        self.bias = nn.Parameter(torch.zeros(1,out_channels,1,1))
+        self.group = group
+        self.eps = eps
+        self.fc = nn.Linear(width_height ** 2, group)
+    def forward(self, x):
+        N,C,H,W = x.size()
+        x_ = x.view(N*C, -1) # x_.size() == [C*N,H*W]
+        s = F.softmax(self.fc(x_), dim=1) # s.view() == [C*N, group]
+        _, s = torch.max(s.data, dim=1) # s.view() == [C*N], max Index data
+        arr = []
+        for i in range(self.group):
+            arr.append([])
+            arr[i] = [m for m, n in enumerate(s) if n == i]
+        for grp in arr:
+            if len(grp) is 0:
+                continue
+            box = x_[grp].view(-1)
+            box_mean = box.mean()
+            box_var = box.var()
+            x_[grp] = (x_[grp] - box_mean) / (box_var + self.eps).sqrt()
+        x_ = x_.view(N,C,H,W)
+        return x_ * self.weight + self.bias
 
 class BasicBlock(nn.Module):
 
-    def __init__(self, in_channels, out_channels, stride, downsample=None, GN=False, group=1):
+    def __init__(self, in_channels, out_channels, stride, downsample=None, Method=False, group=1, batch_size=64, width_height=32):
         super(BasicBlock, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False)
-        self.norm1 = norm2d(out_channels, group, GN)
+        self.norm1 = norm2d(out_channels, group, Method, batch_size=batch_size, width_height=width_height)
         self.relu = nn.ReLU(True)
         self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
-        self.norm2 = norm2d(out_channels, group, GN)
+        self.norm2 = norm2d(out_channels, group, Method, batch_size=batch_size, width_height=width_height)
         self.downsample = downsample
         
         if downsample is not None:
             residual = []
             residual += [nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False)]
-            residual += [norm2d(out_channels, group, GN)]
+            residual += [norm2d(out_channels, group, Method, batch_size=batch_size, width_height=width_height)]
             self.downsample = nn.Sequential(*residual)
 
     def forward(self, x):
@@ -43,10 +136,10 @@ class BasicBlock(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, num_class=10, layer=56, GN=False, group=1):
+    def __init__(self, num_class=10, layer=56, Method=False, group=1, batch_size=None):
         super(ResNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1, bias=False)
-        self.norm = norm2d(16, group, GN)
+        self.norm = norm2d(16, group, Method, batch_size=batch_size, width_height=32)
         self.relu = nn.ReLU(inplace=True)
 
         if layer is 14:
@@ -64,19 +157,19 @@ class ResNet(nn.Module):
             
 
         self.layer1 = nn.Sequential()
-        self.layer1.add_module('layer1_0', BasicBlock(in_channels=16, out_channels=16, stride=1, downsample=None, GN=GN, group=group))
+        self.layer1.add_module('layer1_0', BasicBlock(in_channels=16, out_channels=16, stride=1, downsample=None, Method=Method, group=group, batch_size=batch_size, width_height=32))
         for i in range(1,self.n):
-            self.layer1.add_module('layer1_%d' % (i), BasicBlock(in_channels=16, out_channels=16, stride=1, downsample=None, GN=GN, group=group))
+            self.layer1.add_module('layer1_%d' % (i), BasicBlock(in_channels=16, out_channels=16, stride=1, downsample=None, Method=Method, group=group, batch_size=batch_size, width_height=32))
 
         self.layer2 = nn.Sequential()
-        self.layer2.add_module('layer2_0', BasicBlock(in_channels=16, out_channels=32, stride=2, downsample=True, GN=GN, group=group))
+        self.layer2.add_module('layer2_0', BasicBlock(in_channels=16, out_channels=32, stride=2, downsample=True, Method=Method, group=group, batch_size=batch_size, width_height=16))
         for i in range(1,self.n):
-            self.layer2.add_module('layer2_%d' % (i), BasicBlock(in_channels=32, out_channels=32, stride=1, downsample=None, GN=GN, group=group))
+            self.layer2.add_module('layer2_%d' % (i), BasicBlock(in_channels=32, out_channels=32, stride=1, downsample=None, Method=Method, group=group, batch_size=batch_size, width_height=16))
 
         self.layer3 = nn.Sequential()
-        self.layer3.add_module('layer3_0', BasicBlock(in_channels=32, out_channels=64, stride=2, downsample=True, GN=GN, group=group))
+        self.layer3.add_module('layer3_0', BasicBlock(in_channels=32, out_channels=64, stride=2, downsample=True, Method=Method, group=group, batch_size=batch_size, width_height=8))
         for i in range(1,self.n):
-            self.layer3.add_module('layer3_%d' % (i), BasicBlock(in_channels=64, out_channels=64, stride=1, downsample=None, GN=GN, group=group))
+            self.layer3.add_module('layer3_%d' % (i), BasicBlock(in_channels=64, out_channels=64, stride=1, downsample=None, Method=Method, group=group, batch_size=batch_size, width_height=8))
 
         self.avgpool = nn.AvgPool2d(kernel_size=8, stride=1)
         self.fc = nn.Linear(64, num_class)

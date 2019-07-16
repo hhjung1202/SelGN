@@ -27,7 +27,7 @@ parser.add_argument('--img-size', type=int, default=32, help='input image width,
 parser.add_argument('--layer', type=int, default=0, help='layer size : 14, 20, 32, 44, 56, 110')
 parser.add_argument('--dir', default='./', type=str, help='default save directory')
 parser.add_argument('--gpu', default='0', type=str, help='Multi GPU ids to use.')
-parser.add_argument('--gn', type=int, default=0, help='GN use or not')
+parser.add_argument('--Method', default='BN', type=str, help='main Method BN|GN|P1|P2')
 parser.add_argument('--group', type=int, default=1, help='number of group at GN')
 
 
@@ -83,13 +83,21 @@ def main():
             param_group['lr'] = lr
 
         train(state_info, train_loader, epoch)
-        test(state_info, test_loader, epoch)
+        prec_result = test(state_info, test_loader, epoch)
+
+        if prec_result > best_prec_result:
+            best_prec_result = prec_result
+            filename = 'checkpoint_best.pth.tar'
+            utils.save_state_checkpoint(state_info, best_prec_result, filename, utils.default_model_dir, epoch)
 
         filename = 'latest.pth.tar'
         utils.save_state_checkpoint(state_info, best_prec_result, filename, utils.default_model_dir, epoch)
 
     now = time.gmtime(time.time() - start_time)
     utils.print_log('{} hours {} mins {} secs for training'.format(now.tm_hour, now.tm_min, now.tm_sec))
+    utils.print_log('Best Prec : {}'.format(best_prec_result.item()))
+    
+    print('done')
 
 
 def train(state_info, train_loader, epoch): # all 
@@ -146,6 +154,7 @@ def test(state_info, test_loader, epoch):
     print('Test, {}, {:.2f}'.format(epoch, 100.*correct / total))
     
     utils.print_log('')
+    return 100.*correct / total
 
 
 def dataset_selector(data):
