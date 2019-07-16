@@ -89,6 +89,7 @@ def main():
             best_prec_result = prec_result
             filename = 'checkpoint_best.pth.tar'
             utils.save_state_checkpoint(state_info, best_prec_result, filename, utils.default_model_dir, epoch)
+            print('Best Prec : {}'.format(best_prec_result.item()))
 
         filename = 'latest.pth.tar'
         utils.save_state_checkpoint(state_info, best_prec_result, filename, utils.default_model_dir, epoch)
