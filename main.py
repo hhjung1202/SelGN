@@ -24,7 +24,7 @@ parser.add_argument('--lr', '--learning-rate', default=1e-1, type=float, metavar
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M', help='momentum')
 parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay (default: 1e-4)')
 parser.add_argument('--img-size', type=int, default=32, help='input image width, height size')
-parser.add_argument('--layer', type=int, default=0, help='layer size : 14, 20, 32, 44, 56, 110')
+parser.add_argument('--layer', type=int, default=2, help='layer size : 14, 20, 32, 44, 56, 110')
 parser.add_argument('--dir', default='./', type=str, help='default save directory')
 parser.add_argument('--gpu', default='0', type=str, help='Multi GPU ids to use.')
 parser.add_argument('--Method', default='BN', type=str, help='main Method BN|GN|P1|P2')
