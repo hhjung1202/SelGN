@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import time
 
 def norm2d(out_channels, group, Method, batch_size=None, width_height=None):
     if Method == "GN":
