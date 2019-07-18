@@ -12,6 +12,14 @@ def norm2d(out_channels, group, Method, batch_size=None, width_height=None):
     elif Method == "P2":
         return Proposed_ver2(width_height, group, out_channels)
 
+def print_time(start_time, log):
+    utils.print_log(log + ' : {}'.format(time.time() - start_time))
+
+def print_time_relay(start_time, log):
+    now = time.time()
+    utils.print_log(log + ' : {}'.format(now - start_time))
+    return now
+
 class GroupNorm(nn.Module):
     def __init__(self, group, out_channels, eps=1e-5):
         super(GroupNorm, self).__init__()
@@ -55,16 +63,24 @@ class Proposed_ver1(nn.Module):
         self.fc = nn.Linear(batch_size * 2, group)
     def forward(self, x):
         N,C,H,W = x.size()
+        start_time = time.time()
         x_ = torch.transpose(x,0,1).view(C, N, -1) # transpose 후 x_.size() == [C,N,H,W]
+        start_time = print_time_relay(start_time, "P1_1s duration")
         mean = x_.mean(-1, keepdim=True).squeeze(-1) # mean.size() == [C,N]
+        start_time = print_time_relay(start_time, "P1_2s duration")
         var = x_.var(-1, keepdim=True).squeeze(-1) # var.size() == [C,N]
+        start_time = print_time_relay(start_time, "P1_3s duration")
         s = torch.cat([mean, var], 1) # s.view() == [C, 2N]
+        start_time = print_time_relay(start_time, "P1_4s duration")
         s = F.softmax(self.fc(s), dim=1) # s.view() == [C, group]
+        start_time = print_time_relay(start_time, "P1_5s duration")
         _, s = torch.max(s.data, dim=1) # s.view() == [C], max Index data
+        start_time = print_time_relay(start_time, "P1_6s duration")
         arr = []
         for i in range(self.group):
             arr.append([])
             arr[i] = [m for m, n in enumerate(s) if n == i]
+        start_time = print_time_relay(start_time, "P1_7s duration")
         for grp in arr:
             if len(grp) is 0:
                 continue
@@ -72,6 +88,7 @@ class Proposed_ver1(nn.Module):
             box_mean = box.mean(-1, keepdim=True).view(-1,1,1,1)
             box_var = box.var(-1, keepdim=True).view(-1,1,1,1)
             x[:,grp] = (x[:,grp] - box_mean) / (box_var + self.eps).sqrt()
+        start_time = print_time_relay(start_time, "P1_8s duration")
         return x * self.weight + self.bias
 
 class Proposed_ver2(nn.Module):
@@ -84,13 +101,18 @@ class Proposed_ver2(nn.Module):
         self.fc = nn.Linear(width_height ** 2, group)
     def forward(self, x):
         N,C,H,W = x.size()
+        start_time = time.time()
         x_ = x.view(N*C, -1) # x_.size() == [C*N,H*W]
+        start_time = print_time_relay(start_time, "P2_1s duration")
         s = F.softmax(self.fc(x_), dim=1) # s.view() == [C*N, group]
+        start_time = print_time_relay(start_time, "P2_2s duration")
         _, s = torch.max(s.data, dim=1) # s.view() == [C*N], max Index data
+        start_time = print_time_relay(start_time, "P2_3s duration")
         arr = []
         for i in range(self.group):
             arr.append([])
             arr[i] = [m for m, n in enumerate(s) if n == i]
+        start_time = print_time_relay(start_time, "P2_4s duration")
         for grp in arr:
             if len(grp) is 0:
                 continue
@@ -98,7 +120,9 @@ class Proposed_ver2(nn.Module):
             box_mean = box.mean()
             box_var = box.var()
             x_[grp] = (x_[grp] - box_mean) / (box_var + self.eps).sqrt()
+        start_time = print_time_relay(start_time, "P2_5s duration")
         x_ = x_.view(N,C,H,W)
+        start_time = print_time_relay(start_time, "P2_6s duration")
         return x_ * self.weight + self.bias
 
 class BasicBlock(nn.Module):
@@ -121,11 +145,18 @@ class BasicBlock(nn.Module):
     def forward(self, x):
         residual = x
         out = self.conv1(x)
+        
+        start_time = time.time()
         out = self.norm1(out)
+        print_time(start_time, "Norm1 duration")
+
         out = self.relu(out)
 
         out = self.conv2(out)
+
+        start_time = time.time()
         out = self.norm2(out)
+        print_time(start_time, "Norm2 duration")
 
         if self.downsample is not None:
             residual = self.downsample(x)
@@ -175,8 +206,13 @@ class ResNet(nn.Module):
         self.fc = nn.Linear(64, num_class)
 
     def forward(self, x):
+
+        start_time = time.time()
         x = self.conv1(x)
+        start_time2 = time.time()
         x = self.norm(x)
+        print_time(start_time2, "Init norm duration")
+
         x = self.relu(x)
 
         x = self.layer1(x)
@@ -186,4 +222,6 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
+        print_time(start_time, "Whole Procedure Duration")
+
         return x
