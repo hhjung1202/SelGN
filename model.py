@@ -14,7 +14,7 @@ def norm2d(out_channels, group, Method, batch_size=None, width_height=None):
         return Proposed_ver2(width_height, group, out_channels)
 
 def print_time(start_time, log):
-    utils.print_log(log + ' : {}'.format(time.time() - start_time))
+    print_log(log + ' : {}'.format(time.time() - start_time))
 
 def print_time_relay(start_time, log):
     now = time.time()
