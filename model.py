@@ -18,7 +18,7 @@ def print_time(start_time, log):
 
 def print_time_relay(start_time, log):
     now = time.time()
-    utils.print_log(log + ' : {}'.format(now - start_time))
+    print('{} : {}'.format(log, now - start_time))
     return now
 
 class GroupNorm(nn.Module):
