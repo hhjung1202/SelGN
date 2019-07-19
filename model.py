@@ -77,11 +77,13 @@ class Proposed_ver1(nn.Module):
         start_time = print_time_relay(start_time, "P1_5s duration")
         _, s = torch.max(s.data, dim=1) # s.view() == [C], max Index data
         start_time = print_time_relay(start_time, "P1_6s duration")
+        group_list = torch.FloatTensor(C, self.group).zero_().scatter_(1, s.view(-1, 1), 1).transpose(0,1)
+        start_time = print_time_relay(start_time, "P1_7s duration")
         arr = []
         for i in range(self.group):
             arr.append([])
-            arr[i] = [m for m, n in enumerate(s) if n == i]
-        start_time = print_time_relay(start_time, "P1_7s duration")
+            arr[i] = torch.nonzero(group_list[i]).view(-1)
+        start_time = print_time_relay(start_time, "P1_8s duration")
         for grp in arr:
             if len(grp) is 0:
                 continue
@@ -89,7 +91,7 @@ class Proposed_ver1(nn.Module):
             box_mean = box.mean(-1, keepdim=True).view(-1,1,1,1)
             box_var = box.var(-1, keepdim=True).view(-1,1,1,1)
             x[:,grp] = (x[:,grp] - box_mean) / (box_var + self.eps).sqrt()
-        start_time = print_time_relay(start_time, "P1_8s duration")
+        start_time = print_time_relay(start_time, "P1_9s duration")
         return x * self.weight + self.bias
 
 class Proposed_ver2(nn.Module):
