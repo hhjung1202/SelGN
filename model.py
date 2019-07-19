@@ -77,7 +77,7 @@ class Proposed_ver1(nn.Module):
         start_time = print_time_relay(start_time, "P1_5s duration")
         _, s = torch.max(s.data, dim=1) # s.view() == [C], max Index data
         start_time = print_time_relay(start_time, "P1_6s duration")
-        group_list = torch.FloatTensor(C, self.group).zero_().scatter_(1, s.view(-1, 1), 1).transpose(0,1)
+        group_list = torch.FloatTensor(C, self.group).cuda().zero_().scatter_(1, s.view(-1, 1), 1).transpose(0,1)
         start_time = print_time_relay(start_time, "P1_7s duration")
         arr = []
         for i in range(self.group):
