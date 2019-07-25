@@ -51,17 +51,21 @@ class Proposed_ver1(nn.Module):
         self.bias = nn.Parameter(torch.zeros(1,out_channels,1,1))
         self.group = group
         self.eps = eps
-        models = []
-        models += [nn.Conv2d(batch_size, batch_size, kernel_size=3, stride=1, padding=1, bias=False)]
-        models += [nn.ReLU(True)]
-        models += [nn.AvgPool2d(kernel_size=width_height, stride=1)]
-        models += [nn.Linear(batch_size, batch_size)]
-        models += [nn.Linear(batch_size, group)]
-        self.model = nn.Sequential(*models)
+        self.model = nn.Sequential(
+            nn.Conv2d(batch_size, batch_size, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.ReLU(True),
+            nn.AvgPool2d(kernel_size=width_height, stride=1),
+        )
+        self.fc = nn.Sequential(
+            nn.Linear(batch_size, batch_size),
+            nn.Linear(batch_size, group),
+        )
     def forward(self, x):
         N,C,H,W = x.size()
         x_ = torch.transpose(x,0,1) # transpose 후 x_.size() == [C,N,H,W]
-        s = F.softmax(self.model(x_), dim=1) # s.view() == [C, group]
+        x_ = self.model(x_)
+        x_ = x_.view(C, -1)
+        s = F.softmax(self.fc(x_), dim=1) # s.view() == [C, group]
         _, s = torch.max(s.data, dim=1) # s.view() == [C], max Index data
         group_list = torch.FloatTensor(C, self.group).cuda().zero_().scatter_(1, s.view(-1, 1), 1).transpose(0,1)
         arr = []
