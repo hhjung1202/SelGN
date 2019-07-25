@@ -1,5 +1,2 @@
 #!/bin/bash
-python3 ../main.py --dir /data2/hhjung/Normalization/P1/group8/batch16 -b 16 --Method P1 --group 8 --gpu 5 --layer 2 1> /dev/null && 
-python3 ../main.py --dir /data2/hhjung/Normalization/P1/group8/batch32 -b 32 --Method P1 --group 8 --gpu 5 --layer 2 1> /dev/null && 
-python3 ../main.py --dir /data2/hhjung/Normalization/P1/group8/batch64 -b 64 --Method P1 --group 8 --gpu 5 --layer 2 1> /dev/null && 
-python3 ../main.py --dir /data2/hhjung/Normalization/P1/group8/batch128 -b 128 --Method P1 --group 8 --gpu 5 --layer 2 1> /dev/null
+python3 ../main.py --dir /data2/hhjung/Norm2/P1/group4/batch16 -b 16 --Method P1 --group 4 --gpu 5 --layer 2 1> /dev/null

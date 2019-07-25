@@ -1,2 +1,4 @@
 #!/bin/bash
-python3 ../main.py --dir /data2/hhjung/Normalization/test3_2 -b 64 --epoch 1 --Method P1 --group 4 --gpu 0 --layer 2 1> log3_2
+python3 ../main.py --dir /data2/hhjung/Norm2/P1/group2/batch32 -b 32 --Method P1 --group 2 --gpu 0 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm2/P1/group2/batch64 -b 64 --Method P1 --group 2 --gpu 0 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm2/P1/group2/batch128 -b 128 --Method P1 --group 2 --gpu 0 --layer 2 1> /dev/null
