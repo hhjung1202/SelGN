@@ -60,11 +60,8 @@ class Proposed_ver1(nn.Module):
         self.model = nn.Sequential(*models)
     def forward(self, x):
         N,C,H,W = x.size()
-        x_ = torch.transpose(x,0,1).view(C, N, -1) # transpose 후 x_.size() == [C,N,H,W]
-        mean = x_.mean(-1, keepdim=True).squeeze(-1) # mean.size() == [C,N]
-        var = x_.var(-1, keepdim=True).squeeze(-1) # var.size() == [C,N]
-        s = torch.cat([mean, var], 1) # s.view() == [C, 2N]
-        s = F.softmax(self.model(s), dim=1) # s.view() == [C, group]
+        x_ = torch.transpose(x,0,1) # transpose 후 x_.size() == [C,N,H,W]
+        s = F.softmax(self.model(x_), dim=1) # s.view() == [C, group]
         _, s = torch.max(s.data, dim=1) # s.view() == [C], max Index data
         group_list = torch.FloatTensor(C, self.group).cuda().zero_().scatter_(1, s.view(-1, 1), 1).transpose(0,1)
         arr = []
