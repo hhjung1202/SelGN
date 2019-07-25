@@ -52,7 +52,7 @@ class Proposed_ver1(nn.Module):
         self.group = group
         self.eps = eps
         models = []
-        models += [nn.Conv2d(batch_size, batch_size, kernel_size=3, stride=1, bias=False)]
+        models += [nn.Conv2d(batch_size, batch_size, kernel_size=3, stride=1, padding=1, bias=False)]
         models += [nn.ReLU(True)]
         models += [nn.AvgPool2d(kernel_size=width_height, stride=1)]
         models += [nn.Linear(batch_size, batch_size)]
@@ -61,7 +61,6 @@ class Proposed_ver1(nn.Module):
     def forward(self, x):
         N,C,H,W = x.size()
         x_ = torch.transpose(x,0,1) # transpose 후 x_.size() == [C,N,H,W]
-        print(x_.size())
         s = F.softmax(self.model(x_), dim=1) # s.view() == [C, group]
         _, s = torch.max(s.data, dim=1) # s.view() == [C], max Index data
         group_list = torch.FloatTensor(C, self.group).cuda().zero_().scatter_(1, s.view(-1, 1), 1).transpose(0,1)
