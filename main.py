@@ -111,6 +111,8 @@ def train(state_info, train_loader, epoch): # all
     train_loss = 0
 
     for it, (x, y) in enumerate(train_loader):
+        if x.size(0) is not args.batch_size:
+            continue
 
         x, y = to_var(x, FloatTensor), to_var(y, LongTensor)
         output = state_info.forward(x)
@@ -143,6 +145,8 @@ def test(state_info, test_loader, epoch):
     total = torch.tensor(0, dtype=torch.float32)
 
     for it, (x, y) in enumerate(test_loader):
+        if x.size(0) is not args.batch_size:
+            continue
 
         x, y = to_var(x, FloatTensor), to_var(y, LongTensor)
         output = state_info.forward(x)

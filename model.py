@@ -12,7 +12,7 @@ def norm2d(out_channels, group, Method, batch_size=None, width_height=None, use=
     elif Method == "BN":
         return nn.BatchNorm2d(out_channels)
     elif Method == "P1":
-        return Proposed_ver1(batch_size, group, out_channels)
+        return Proposed_ver1(width_height, batch_size, group, out_channels)
     elif Method == "P2":
         return Proposed_ver2(width_height, group, out_channels)
 
@@ -45,20 +45,26 @@ class GroupNorm(nn.Module):
         return x * self.weight + self.bias
 
 class Proposed_ver1(nn.Module):
-    def __init__(self, batch_size, group, out_channels, eps=1e-5):
+    def __init__(self, width_height, batch_size, group, out_channels, eps=1e-5):
         super(Proposed_ver1, self).__init__()
         self.weight = nn.Parameter(torch.ones(1,out_channels,1,1))
         self.bias = nn.Parameter(torch.zeros(1,out_channels,1,1))
         self.group = group
         self.eps = eps
-        self.fc = nn.Linear(batch_size * 2, group)
+        models = []
+        models += [nn.Conv2d(batch_size, batch_size, kernel_size=3, stride=1, bias=False)]
+        models += [nn.ReLU(True)]
+        models += [nn.AvgPool2d(kernel_size=width_height, stride=1)]
+        models += [nn.Linear(batch_size, batch_size)]
+        models += [nn.Linear(batch_size, group)]
+        self.model = nn.Sequential(*models)
     def forward(self, x):
         N,C,H,W = x.size()
         x_ = torch.transpose(x,0,1).view(C, N, -1) # transpose 후 x_.size() == [C,N,H,W]
         mean = x_.mean(-1, keepdim=True).squeeze(-1) # mean.size() == [C,N]
         var = x_.var(-1, keepdim=True).squeeze(-1) # var.size() == [C,N]
         s = torch.cat([mean, var], 1) # s.view() == [C, 2N]
-        s = F.softmax(self.fc(s), dim=1) # s.view() == [C, group]
+        s = F.softmax(self.model(s), dim=1) # s.view() == [C, group]
         _, s = torch.max(s.data, dim=1) # s.view() == [C], max Index data
         group_list = torch.FloatTensor(C, self.group).cuda().zero_().scatter_(1, s.view(-1, 1), 1).transpose(0,1)
         arr = []
