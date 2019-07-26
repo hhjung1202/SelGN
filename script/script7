@@ -1,2 +1,5 @@
 #!/bin/bash
-python3 ../main.py --dir /data2/hhjung/Norm2/P1/group8/batch16 -b 16 --Method P1 --group 8 --gpu 6 --layer 2 1> /dev/null
+python3 ../main.py --dir /data2/hhjung/Norm2/GN/First/group8/batch16 -b 16 --Method GN --group 8 --gpu 6 --layer 2 1> /dev/null &&
+python3 ../main.py --dir /data2/hhjung/Norm2/GN/First/group8/batch32 -b 32 --Method GN --group 8 --gpu 6 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm2/GN/First/group8/batch64 -b 64 --Method GN --group 8 --gpu 6 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm2/GN/First/group8/batch128 -b 128 --Method GN --group 8 --gpu 6 --layer 2 1> /dev/null
