@@ -192,7 +192,7 @@ class ResNet(nn.Module):
     def __init__(self, num_class=10, layer=56, Method=False, group=1, batch_size=None):
         super(ResNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1, bias=False)
-        self.norm = norm2d(16, group, Method, batch_size=batch_size, width_height=32)
+        self.norm = norm2d(16, group, Method, batch_size=batch_size, width_height=32, use=True)
         self.relu = nn.ReLU(inplace=True)
 
         if layer is 14:
@@ -221,9 +221,8 @@ class ResNet(nn.Module):
 
         self.layer3 = nn.Sequential()
         self.layer3.add_module('layer3_0', BasicBlock(in_channels=32, out_channels=64, stride=2, downsample=True, Method=Method, group=group, batch_size=batch_size, width_height=8))
-        for i in range(1,self.n-1):
+        for i in range(1,self.n):
             self.layer3.add_module('layer3_%d' % (i), BasicBlock(in_channels=64, out_channels=64, stride=1, downsample=None, Method=Method, group=group, batch_size=batch_size, width_height=8))
-        self.layer3.add_module('layer3_%d' % (self.n-1), BasicBlock(in_channels=64, out_channels=64, stride=1, downsample=None, Method=Method, group=group, batch_size=batch_size, width_height=8, use=True))
 
         self.avgpool = nn.AvgPool2d(kernel_size=8, stride=1)
         self.fc = nn.Linear(64, num_class)
