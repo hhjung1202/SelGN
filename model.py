@@ -73,7 +73,8 @@ class Proposed_ver1(nn.Module):
         x_ = x_.view(C, -1)
         s = F.softmax(self.fc(x_), dim=1) # s.view() == [C, group]
         _, s = torch.max(s.data, dim=1) # s.view() == [C], max Index data
-        print_log(s.item())
+        print(s.size())
+        print(s.item())
         group_list = torch.FloatTensor(C, self.group).cuda().zero_().scatter_(1, s.view(-1, 1), 1).transpose(0,1)
         arr = []
         for i in range(self.group):
