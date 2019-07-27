@@ -3,6 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import time
 
+def print_log(text, filename="channel_sel.csv"):
+    model_filename = os.path.join('./', filename)
+    with open(model_filename, "a") as myfile:
+        myfile.write(text + "\n")
+
 def norm2d(out_channels, group, Method, batch_size=None, width_height=None, use=False):
     if not use:
         return nn.GroupNorm(group, out_channels)
@@ -67,6 +72,7 @@ class Proposed_ver1(nn.Module):
         x_ = x_.view(C, -1)
         s = F.softmax(self.fc(x_), dim=1) # s.view() == [C, group]
         _, s = torch.max(s.data, dim=1) # s.view() == [C], max Index data
+        print_log(s)
         group_list = torch.FloatTensor(C, self.group).cuda().zero_().scatter_(1, s.view(-1, 1), 1).transpose(0,1)
         arr = []
         for i in range(self.group):
@@ -128,21 +134,21 @@ class Proposed_ver2(nn.Module):
         self.bias = nn.Parameter(torch.zeros(1,out_channels,1,1))
         self.group = group
         self.eps = eps
-        self.fc = nn.Linear(width_height ** 2, group)
+        self.fc = nn.Sequential(
+            nn.Linear(width_height ** 2, width_height ** 2),
+            nn.Linear(width_height ** 2, group),
+        )
     def forward(self, x):
         N,C,H,W = x.size()
-        start_time = time.time()
         x_ = x.view(N*C, -1) # x_.size() == [C*N,H*W]
-        start_time = print_time_relay(start_time, "P2_1s duration")
         s = F.softmax(self.fc(x_), dim=1) # s.view() == [C*N, group]
-        start_time = print_time_relay(start_time, "P2_2s duration")
         _, s = torch.max(s.data, dim=1) # s.view() == [C*N], max Index data
-        start_time = print_time_relay(start_time, "P2_3s duration")
+        group_list = torch.FloatTensor(C*N, self.group).cuda().zero_().scatter_(1, s.view(-1, 1), 1).transpose(0,1)
+
         arr = []
         for i in range(self.group):
             arr.append([])
-            arr[i] = [m for m, n in enumerate(s) if n == i]
-        start_time = print_time_relay(start_time, "P2_4s duration")
+            arr[i] = torch.nonzero(group_list[i]).view(-1)
         for grp in arr:
             if len(grp) is 0:
                 continue
@@ -150,9 +156,7 @@ class Proposed_ver2(nn.Module):
             box_mean = box.mean()
             box_var = box.var()
             x_[grp] = (x_[grp] - box_mean) / (box_var + self.eps).sqrt()
-        start_time = print_time_relay(start_time, "P2_5s duration")
         x_ = x_.view(N,C,H,W)
-        start_time = print_time_relay(start_time, "P2_6s duration")
         return x_ * self.weight + self.bias
 
 class BasicBlock(nn.Module):
