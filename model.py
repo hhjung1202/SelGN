@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import time
+import os 
 
 def print_log(text, filename="channel_sel.csv"):
     model_filename = os.path.join('./', filename)
