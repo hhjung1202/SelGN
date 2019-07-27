@@ -69,10 +69,10 @@ def main():
         best_prec_result = checkpoint['Best_Prec']
         state_info.load_state_dict(checkpoint)
 
-    check_selection(state_info, train_loader, epoch)
-    check_selection(state_info, test_loader, epoch)
+    check_selection(state_info, train_loader)
+    check_selection(state_info, test_loader)
 
-def check_selection(state_info, loader, epoch): # all 
+def check_selection(state_info, loader): # all 
 
     state_info.set_train_mode()
     for it, (x, y) in enumerate(loader):
