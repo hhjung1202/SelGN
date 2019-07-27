@@ -7,7 +7,7 @@ import os
 def print_log(text, filename="channel_sel.csv"):
     model_filename = os.path.join('./', filename)
     with open(model_filename, "a") as myfile:
-        myfile.write(text + "\n")
+        myfile.write("{}\n".format(text))
 
 def norm2d(out_channels, group, Method, batch_size=None, width_height=None, use=False):
     if not use:
@@ -73,8 +73,7 @@ class Proposed_ver1(nn.Module):
         x_ = x_.view(C, -1)
         s = F.softmax(self.fc(x_), dim=1) # s.view() == [C, group]
         _, s = torch.max(s.data, dim=1) # s.view() == [C], max Index data
-        print(s.size())
-        print(s.data)
+        print_log(s.data)
         group_list = torch.FloatTensor(C, self.group).cuda().zero_().scatter_(1, s.view(-1, 1), 1).transpose(0,1)
         arr = []
         for i in range(self.group):
