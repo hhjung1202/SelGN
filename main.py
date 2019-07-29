@@ -10,12 +10,12 @@ import time
 import utils
 import dataset
 import math
-
+from parallel import DataParallelCriterion
 
 parser = argparse.ArgumentParser(description='PyTorch Cycle Domain Adaptation Training')
 parser.add_argument('--sd', default='cifar10', type=str, help='source dataset')
 parser.add_argument('--td', default='usps', type=str, help='target dataset')
-parser.add_argument('-j', '--workers', default=4, type=int, metavar='N', help='number of data loading workers (default: 4)')
+parser.add_argument('-j', '--workers', default=16, type=int, metavar='N', help='number of data loading workers (default: 4)')
 parser.add_argument('--epoch', default=165, type=int, metavar='N', help='number of total epoch to run')
 parser.add_argument('--decay-epoch', default=30, type=int, metavar='N', help='epoch from which to start lr decay')
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
@@ -45,8 +45,8 @@ cuda = True if torch.cuda.is_available() else False
 FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
 
-criterion_BCE = torch.nn.BCELoss(reduction='sum')
-criterion = torch.nn.CrossEntropyLoss()
+criterion = DataParallelCriterion(torch.nn.CrossEntropyLoss())
+
 
 def main():
     global args, best_prec_result
@@ -175,6 +175,8 @@ def dataset_selector(data):
         return dataset.MNIST_M_loader(img_size=args.img_size)
     elif data == "cifar10":
         return dataset.cifar10_loader(args)
+    elif data == "cifar100":
+        return dataset.cifar100_loader(args)
 
 def to_var(x, dtype):
     return Variable(x.type(dtype))
