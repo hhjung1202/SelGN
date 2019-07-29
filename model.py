@@ -109,13 +109,13 @@ class Proposed_ver3(nn.Module):
         N,C,H,W = x.size()
         G = self.group
         x = torch.transpose(x,0,1) # transpose 후 x_.size() == [C,N,H,W]
+        print(x.size())
 
         x = x.view(C,G,-1)
         mean = x.mean(-1, keepdim=True)
         var = x.var(-1, keepdim=True)
 
         x = (x-mean) / (var+self.eps).sqrt()
-        print(x.size())
         x = x.view(C,N,H,W)
         x = torch.transpose(x,0,1) # transpose 후 x_.size() == [N,C,H,W]
         return x * self.weight + self.bias
