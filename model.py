@@ -110,6 +110,7 @@ class Proposed_ver3(nn.Module):
         G = self.group
         x = torch.transpose(x,0,1) # transpose 후 x_.size() == [C,N,H,W]
         print(x.size())
+        print(N,C,H,W,G)
 
         x = x.view(C,G,-1)
         mean = x.mean(-1, keepdim=True)
