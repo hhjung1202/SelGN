@@ -112,7 +112,7 @@ class Proposed_ver3(nn.Module):
         print(x.size())
         print(N,C,H,W,G)
 
-        x = x.view(C,G,-1)
+        x = x.view(C,1,-1)
         mean = x.mean(-1, keepdim=True)
         var = x.var(-1, keepdim=True)
 
