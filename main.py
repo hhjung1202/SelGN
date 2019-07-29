@@ -10,7 +10,6 @@ import time
 import utils
 import dataset
 import math
-from parallel import DataParallelCriterion
 
 parser = argparse.ArgumentParser(description='PyTorch Cycle Domain Adaptation Training')
 parser.add_argument('--sd', default='cifar10', type=str, help='source dataset')
@@ -45,7 +44,7 @@ cuda = True if torch.cuda.is_available() else False
 FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
 
-criterion = DataParallelCriterion(torch.nn.CrossEntropyLoss())
+criterion = torch.nn.CrossEntropyLoss()
 
 
 def main():

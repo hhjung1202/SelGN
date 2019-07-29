@@ -10,7 +10,6 @@ import random
 import os
 import math
 import numbers
-from parallel import DataParallelModel
 
 default_model_dir = "./"
 c = None
@@ -31,8 +30,7 @@ class model_optim_state_info(object):
 
     def model_cuda_init(self):
         if torch.cuda.is_available():
-            self.model = DataParallelModel(self.model).cuda()
-            # self.model = nn.DataParallel(self.model).cuda()
+            self.model = nn.DataParallel(self.model).cuda()
 
     def weight_init(self):
         self.model.apply(self.weights_init_normal)
