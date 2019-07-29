@@ -4,10 +4,12 @@ import torch.nn.functional as F
 import time
 import os 
 
-def print_log(text, filename="channel_sel.csv"):
-    model_filename = os.path.join('./', filename)
+def print_log(text, batch, group, filename="channel_sel.csv"):
+    if not os.path.exists('./P1/{}/{}'.format(batch, group)):
+        os.makedirs('./P1/{}/{}'.format(batch, group))
+    model_filename = os.path.join('./P1/{}/{}'.format(batch, group), filename)
     with open(model_filename, "a") as myfile:
-        myfile.write("{}\n".format(text))
+        myfile.write("{}\n".format(str(text)[8: -19]))
 
 def norm2d(out_channels, group, Method, batch_size=None, width_height=None, use=False):
     if not use:
@@ -73,7 +75,7 @@ class Proposed_ver1(nn.Module):
         x_ = x_.view(C, -1)
         s = F.softmax(self.fc(x_), dim=1) # s.view() == [C, group]
         _, s = torch.max(s.data, dim=1) # s.view() == [C], max Index data
-        print_log(s.data)
+        print_log(s.data, N, self.group)
         group_list = torch.FloatTensor(C, self.group).cuda().zero_().scatter_(1, s.view(-1, 1), 1).transpose(0,1)
         arr = []
         for i in range(self.group):
