@@ -9,7 +9,7 @@ def print_log(text, batch, group, filename="channel_sel.csv"):
         os.makedirs('./P1/{}/{}'.format(batch, group))
     model_filename = os.path.join('./P1/{}/{}'.format(batch, group), filename)
     with open(model_filename, "a") as myfile:
-        myfile.write("{}\n".format(str(text)[8: -19]))
+        myfile.write("{}\n".format(text))
 
 def norm2d(out_channels, group, Method, batch_size=None, width_height=None, use=False):
     if not use:
