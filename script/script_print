@@ -14,4 +14,4 @@ python3 ../check_selection.py --dir /data2/hhjung/Norm2/P1/First/group8/batch128
 python3 ../check_selection.py --dir /data2/hhjung/Norm2/P1/First/group16/batch16 -b 16 --Method P1 --group 16 --gpu 3 --layer 2 1> /dev/null &&
 python3 ../check_selection.py --dir /data2/hhjung/Norm2/P1/First/group16/batch32 -b 32 --Method P1 --group 16 --gpu 3 --layer 2 1> /dev/null && 
 python3 ../check_selection.py --dir /data2/hhjung/Norm2/P1/First/group16/batch64 -b 64 --Method P1 --group 16 --gpu 3 --layer 2 1> /dev/null && 
-python3 ../check_selection.py --dir /data2/hhjung/Norm2/P1/First/group16/batch128 -b 128 --Method P1 --group 16 --gpu 3 --layer 2 1> /dev/null &&
+python3 ../check_selection.py --dir /data2/hhjung/Norm2/P1/First/group16/batch128 -b 128 --Method P1 --group 16 --gpu 3 --layer 2 1> /dev/null
