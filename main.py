@@ -29,6 +29,7 @@ parser.add_argument('--dir', default='./', type=str, help='default save director
 parser.add_argument('--gpu', default='0', type=str, help='Multi GPU ids to use.')
 parser.add_argument('--Method', default='BN', type=str, help='main Method BN|GN|P1|P2')
 parser.add_argument('--group', type=int, default=1, help='number of group at GN')
+parser.add_argument('--Mode', type=int, default=0, help='0: first, 1: last, 2: all, 3: None')
 
 
 source_prediction_max_result = []
