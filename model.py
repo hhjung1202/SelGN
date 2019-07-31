@@ -22,7 +22,7 @@ def norm2d(out_channels, group, Method, batch_size=None, width_height=None, use=
     elif Method == "P1":
         return Proposed_ver1(width_height, batch_size, group, out_channels)
     elif Method == "P2":
-        return Proposed_ver2(width_height, group, out_channels)
+        return Proposed_ver2(width_height, batch_size, group, out_channels)
     elif Method == "P3":
         return Proposed_ver3(group, out_channels)
 
@@ -109,7 +109,7 @@ class Proposed_ver3(nn.Module):
         N,C,H,W = x.size()
         G = self.group
         x = torch.transpose(x,0,1) # transpose 후 x_.size() == [C,N,H,W]
-        x = x.contiguous().view(C,G,-1)
+        x = x.contiguous().view(G,-1)
         mean = x.mean(-1, keepdim=True)
         var = x.var(-1, keepdim=True)
 
@@ -119,6 +119,49 @@ class Proposed_ver3(nn.Module):
         return x * self.weight + self.bias
 
 class Proposed_ver2(nn.Module):
+    def __init__(self, width_height, batch_size, group, out_channels, eps=1e-5):
+        super(Proposed_ver1, self).__init__()
+        self.weight = nn.Parameter(torch.ones(1,out_channels,1,1))
+        self.bias = nn.Parameter(torch.zeros(1,out_channels,1,1))
+        self.group = group
+        self.eps = eps
+        self.conv_channel = nn.Sequential(
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.ReLU(True),
+        )
+        self.conv_batch = nn.Sequential(
+            nn.Conv2d(batch_size, batch_size, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.ReLU(True),
+            nn.AvgPool2d(kernel_size=width_height, stride=1),
+        )
+        self.fc = nn.Sequential(
+            nn.Linear(batch_size, batch_size),
+            nn.Linear(batch_size, group),
+        )
+    def forward(self, x):
+        N,C,H,W = x.size()
+        x_ = self.conv_channel(x)
+        x_ = torch.transpose(x_,0,1) # transpose 후 x_.size() == [C,N,H,W]
+        x_ = self.conv_batch(x_)
+        x_ = x_.view(C, -1)
+        s = F.softmax(self.fc(x_), dim=1) # s.view() == [C, group]
+        _, s = torch.max(s.data, dim=1) # s.view() == [C], max Index data
+        # print_log(s.data, N, self.group)
+        group_list = torch.FloatTensor(C, self.group).cuda().zero_().scatter_(1, s.view(-1, 1), 1).transpose(0,1)
+        arr = []
+        for i in range(self.group):
+            arr.append([])
+            arr[i] = torch.nonzero(group_list[i]).view(-1)
+        for grp in arr:
+            if len(grp) is 0:
+                continue
+            box = x[:,grp].view(-1)
+            box_mean = box.mean()
+            box_var = box.var()
+            x[:,grp] = (x[:,grp] - box_mean) / (box_var + self.eps).sqrt()
+        return x * self.weight + self.bias
+
+class Proposed_ver_Instance(nn.Module):
     def __init__(self, width_height, group, out_channels, eps=1e-5):
         super(Proposed_ver2, self).__init__()
         self.weight = nn.Parameter(torch.ones(1,out_channels,1,1))

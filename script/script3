@@ -1,9 +1,17 @@
 #!/bin/bash
-python3 ../main.py --dir /data2/hhjung/Norm3/P1/All/group2/batch16 --Mode 2 -b 16 --Method P1 --group 2 --gpu 2 --layer 2 1> /dev/null && 
-python3 ../main.py --dir /data2/hhjung/Norm3/P1/All/group2/batch32 --Mode 2 -b 32 --Method P1 --group 2 --gpu 2 --layer 2 1> /dev/null && 
-python3 ../main.py --dir /data2/hhjung/Norm3/P1/All/group2/batch64 --Mode 2 -b 64 --Method P1 --group 2 --gpu 2 --layer 2 1> /dev/null && 
-python3 ../main.py --dir /data2/hhjung/Norm3/P1/All/group2/batch128 --Mode 2 -b 128 --Method P1 --group 2 --gpu 2 --layer 2 1> /dev/null && 
-python3 ../main.py --dir /data2/hhjung/Norm3/P1/All/group8/batch16 --Mode 2 -b 16 --Method P1 --group 8 --gpu 2 --layer 2 1> /dev/null &&
-python3 ../main.py --dir /data2/hhjung/Norm3/P1/All/group8/batch32 --Mode 2 -b 32 --Method P1 --group 8 --gpu 2 --layer 2 1> /dev/null && 
-python3 ../main.py --dir /data2/hhjung/Norm3/P1/All/group8/batch64 --Mode 2 -b 64 --Method P1 --group 8 --gpu 2 --layer 2 1> /dev/null && 
-python3 ../main.py --dir /data2/hhjung/Norm3/P1/All/group8/batch128 --Mode 2 -b 128 --Method P1 --group 8 --gpu 2 --layer 2 1> /dev/null
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group2/batch16 --Mode 0 -b 16 --Method P3 --group 2 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group2/batch32 --Mode 0 -b 32 --Method P3 --group 2 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group2/batch64 --Mode 0 -b 64 --Method P3 --group 2 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group2/batch128 --Mode 0 -b 128 --Method P3 --group 2 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group4/batch16 --Mode 0 -b 16 --Method P3 --group 4 --gpu 5 --layer 2 1> /dev/null &&
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group4/batch32 --Mode 0 -b 32 --Method P3 --group 4 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group4/batch64 --Mode 0 -b 64 --Method P3 --group 4 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group4/batch128 --Mode 0 -b 128 --Method P3 --group 4 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group8/batch16 --Mode 0 -b 16 --Method P3 --group 8 --gpu 5 --layer 2 1> /dev/null &&
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group8/batch32 --Mode 0 -b 32 --Method P3 --group 8 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group8/batch64 --Mode 0 -b 64 --Method P3 --group 8 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group8/batch128 --Mode 0 -b 128 --Method P3 --group 8 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group16/batch16 --Mode 0 -b 16 --Method P3 --group 16 --gpu 5 --layer 2 1> /dev/null &&
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group16/batch32 --Mode 0 -b 32 --Method P3 --group 16 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group16/batch64 --Mode 0 -b 64 --Method P3 --group 16 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm4/P3/First/group16/batch128 --Mode 0 -b 128 --Method P3 --group 16 --gpu 5 --layer 2 1> /dev/null
