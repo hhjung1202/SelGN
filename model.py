@@ -120,7 +120,7 @@ class Proposed_ver3(nn.Module):
 
 class Proposed_ver2(nn.Module):
     def __init__(self, width_height, batch_size, group, out_channels, eps=1e-5):
-        super(Proposed_ver1, self).__init__()
+        super(Proposed_ver2, self).__init__()
         self.weight = nn.Parameter(torch.ones(1,out_channels,1,1))
         self.bias = nn.Parameter(torch.zeros(1,out_channels,1,1))
         self.group = group
