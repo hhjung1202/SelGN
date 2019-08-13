@@ -86,7 +86,7 @@ class SpatialNorm2(nn.Module):
         channel = self.channel(x)
         spatial = self.spatial(x)
 
-        mapping = torch.ones(N,C,H,W) * channel * spatial
+        mapping = torch.ones(N,C,H,W, dtype=torch.cuda.FloatTensor) * channel * spatial
 
         gamma = self.conv_gamma(mapping)
         beta = self.conv_beta(mapping)
