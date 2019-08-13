@@ -1,0 +1,17 @@
+#!/bin/bash
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group2/batch16 --Mode 1 -b 16 --Method P3 --group 2 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group2/batch32 --Mode 1 -b 32 --Method P3 --group 2 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group2/batch64 --Mode 1 -b 64 --Method P3 --group 2 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group2/batch128 --Mode 1 -b 128 --Method P3 --group 2 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group4/batch16 --Mode 1 -b 16 --Method P3 --group 4 --gpu 5 --layer 2 1> /dev/null &&
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group4/batch32 --Mode 1 -b 32 --Method P3 --group 4 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group4/batch64 --Mode 1 -b 64 --Method P3 --group 4 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group4/batch128 --Mode 1 -b 128 --Method P3 --group 4 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group8/batch16 --Mode 1 -b 16 --Method P3 --group 8 --gpu 5 --layer 2 1> /dev/null &&
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group8/batch32 --Mode 1 -b 32 --Method P3 --group 8 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group8/batch64 --Mode 1 -b 64 --Method P3 --group 8 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group8/batch128 --Mode 1 -b 128 --Method P3 --group 8 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group16/batch16 --Mode 1 -b 16 --Method P3 --group 16 --gpu 5 --layer 2 1> /dev/null &&
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group16/batch32 --Mode 1 -b 32 --Method P3 --group 16 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group16/batch64 --Mode 1 -b 64 --Method P3 --group 16 --gpu 5 --layer 2 1> /dev/null && 
+python3 ../main.py --dir /data2/hhjung/Norm3/P3/Last/group16/batch128 --Mode 1 -b 128 --Method P3 --group 16 --gpu 5 --layer 2 1> /dev/null
