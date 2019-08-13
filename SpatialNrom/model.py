@@ -62,9 +62,9 @@ class SpatialNorm2(nn.Module):
         self.channel = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
             Flatten(),
-            nn.Linear(channel, channel, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Linear(channel, channel),
             nn.ReLU(True),
-            nn.Linear(channel, channel, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Linear(channel, channel),
             UnFlatten(),
         )
 
