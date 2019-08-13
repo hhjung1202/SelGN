@@ -39,6 +39,12 @@ class SpatialNorm(nn.Module):
         sh = self.share(x)
         gamma = self.conv_gamma(sh)
         beta = self.conv_beta(sh)
+
+        print('all mean gamma',torch.mean(gamma))
+        print('all mean beta'torch.mean(beta))
+
+        print('all mean gamma2',torch.mean(gamma.view(gamma.size(0), -1), 1))
+        print('all mean beta2',torch.mean(beta.view(beta.size(0), -1), 1))
         
         return norm_x * (1 + gamma) + beta
 
@@ -90,6 +96,12 @@ class SpatialNorm2(nn.Module):
 
         gamma = self.conv_gamma(mapping)
         beta = self.conv_beta(mapping)
+
+        print('all mean gamma',torch.mean(gamma))
+        print('all mean beta'torch.mean(beta))
+
+        print('all mean gamma2',torch.mean(gamma.view(gamma.size(0), -1), 1))
+        print('all mean beta2',torch.mean(beta.view(beta.size(0), -1), 1))
 
         return norm_x * (1 + gamma) + beta
 
@@ -167,6 +179,8 @@ class ResNet(nn.Module):
 
     def forward(self, x):
 
+        print('start')
+
         x = self.conv1(x)
         x = self.norm(x)
 
@@ -179,5 +193,7 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
+
+        print('end')
 
         return x
