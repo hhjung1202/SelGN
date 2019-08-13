@@ -41,7 +41,7 @@ class SpatialNorm(nn.Module):
         beta = self.conv_beta(sh)
 
         print('all mean gamma',torch.mean(gamma))
-        print('all mean beta'torch.mean(beta))
+        print('all mean beta',torch.mean(beta))
 
         print('all mean gamma2',torch.mean(gamma.view(gamma.size(0), -1), 1))
         print('all mean beta2',torch.mean(beta.view(beta.size(0), -1), 1))
@@ -98,7 +98,7 @@ class SpatialNorm2(nn.Module):
         beta = self.conv_beta(mapping)
 
         print('all mean gamma',torch.mean(gamma))
-        print('all mean beta'torch.mean(beta))
+        print('all mean beta',torch.mean(beta))
 
         print('all mean gamma2',torch.mean(gamma.view(gamma.size(0), -1), 1))
         print('all mean beta2',torch.mean(beta.view(beta.size(0), -1), 1))
