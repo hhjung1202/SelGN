@@ -29,8 +29,15 @@ class SpatialNorm(nn.Module):
             nn.ReLU(True),
         )
 
-        self.conv_gamma = nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False)
-        self.conv_beta = nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv_gamma = nn.Sequential(
+            nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False)
+            nn.Sigmoid(),
+        )
+        self.conv_beta = nn.Sequential(
+            nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False)
+            nn.Sigmoid(),
+        )
+
         self.eps = eps
 
     def forward(self, x):
@@ -40,12 +47,6 @@ class SpatialNorm(nn.Module):
         gamma = self.conv_gamma(sh)
         beta = self.conv_beta(sh)
 
-        print('all mean gamma',torch.mean(gamma))
-        print('all mean beta',torch.mean(beta))
-
-        print('all mean gamma2',torch.mean(gamma.view(gamma.size(0), -1), 1))
-        print('all mean beta2',torch.mean(beta.view(beta.size(0), -1), 1))
-        
         return norm_x * (1 + gamma) + beta
 
 class Flatten(nn.Module):
@@ -82,8 +83,14 @@ class SpatialNorm2(nn.Module):
             nn.Conv2d(channel, 1, kernel_size=3, stride=1, padding=1, bias=False),
         )
 
-        self.conv_gamma = nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False)
-        self.conv_beta = nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv_gamma = nn.Sequential(
+            nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False)
+            nn.Sigmoid(),
+        )
+        self.conv_beta = nn.Sequential(
+            nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False)
+            nn.Sigmoid(),
+        )
         self.eps = eps
 
     def forward(self, x):
@@ -96,12 +103,6 @@ class SpatialNorm2(nn.Module):
 
         gamma = self.conv_gamma(mapping)
         beta = self.conv_beta(mapping)
-
-        print('all mean gamma',torch.mean(gamma))
-        print('all mean beta',torch.mean(beta))
-
-        print('all mean gamma2',torch.mean(gamma.view(gamma.size(0), -1), 1))
-        print('all mean beta2',torch.mean(beta.view(beta.size(0), -1), 1))
 
         return norm_x * (1 + gamma) + beta
 
