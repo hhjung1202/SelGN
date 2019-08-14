@@ -35,15 +35,24 @@ class model_optim_state_info(object):
     def weight_init(self):
         self.model.apply(self.weights_init_normal)
 
-    def weights_init_normal(self, m):
-        if isinstance(m, nn.ConvTranspose2d) or isinstance(m, nn.Conv2d):
-            torch.nn.init.normal_(m.weight.data, 0.0, 0.02)
+    def weights_init_normal(self, m, init_type="kaiming"):
+
+
+        if isinstance(m, nn.ConvTranspose2d) or isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+            if init_type == 'normal':
+                torch.nn.init.normal_(m.weight.data, 0.0, 0.02)
+            elif init_type == 'xavier':
+                torch.nn.init.xavier_normal_(m.weight.data, gain=1.0)
+            elif init_type == 'kaiming':
+                torch.nn.init.kaiming_normal_(m.weight.data, a=0, mode='fan_in')
+
         elif isinstance(m, nn.BatchNorm2d):
             torch.nn.init.normal_(m.weight.data, 1.0, 0.02)
             torch.nn.init.constant_(m.bias.data, 0.0)
 
     def optimizer_init(self, args):
-        self.optimizer = optim.SGD(self.model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=args.lr, betas=(args.b1, args.b2), weight_decay=args.weight_decay)
+        # self.optimizer = optim.SGD(self.model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
 
     def set_train_mode(self):
         self.model.train()
