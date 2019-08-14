@@ -53,7 +53,7 @@ class SpatialNorm(nn.Module):
         print('all mean gamma2',torch.mean(gamma.view(gamma.size(0), -1), 1))
         print('all mean beta2',torch.mean(beta.view(beta.size(0), -1), 1))
 
-        return norm_x * (1 + gamma) + beta
+        return norm_x * (0.5 + gamma) + (beta - 0.5)
 
 class Flatten(nn.Module):
     def forward(self, x):
@@ -116,7 +116,7 @@ class SpatialNorm2(nn.Module):
         print('all mean gamma2',torch.mean(gamma.view(gamma.size(0), -1), 1))
         print('all mean beta2',torch.mean(beta.view(beta.size(0), -1), 1))
 
-        return norm_x * (1 + gamma) + beta
+        return norm_x * (0.5 + gamma) + (beta - 0.5)
 
 class BasicBlock(nn.Module):
 
