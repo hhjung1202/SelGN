@@ -114,8 +114,8 @@ class SpatialNorm2(nn.Module):
     def forward(self, x):
         N,C,H,W = x.size()
         norm_x = self.norm(x)
-        x_out = self.channel(x)
-        x_out = self.spatial(x_out)
+        x_out = x * self.channel(x)
+        x_out = x_out * self.spatial(x_out)
 
         gamma = self.conv_gamma(x_out)
         beta = self.conv_beta(x_out)
