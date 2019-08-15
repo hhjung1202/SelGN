@@ -16,7 +16,7 @@ def norm2d(out_channels, Method, norm_type="batch", use=False):
         return SpatialNorm2(out_channels, norm_type=norm_type)
 
 class SpatialNorm(nn.Module):
-    def __init__(self, channel, norm_type="batch", eps=1e-5):
+    def __init__(self, channel, r=1, norm_type="batch", eps=1e-5):
         super(SpatialNorm, self).__init__()
 
         if norm_type == 'instance':
@@ -25,17 +25,22 @@ class SpatialNorm(nn.Module):
             self.norm = nn.BatchNorm2d(channel, affine=False)
 
         self.share = nn.Sequential(
-            nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(channel, channel//r, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(channel//r),
             nn.ReLU(True),
+            nn.Conv2d(channel//r, channel, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Sigmoid(),
         )
 
         self.conv_gamma = nn.Sequential(
-            nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.Sigmoid(),
+            nn.Conv2d(channel, channel, kernel_size=1, stride=1, padding=1, bias=False),
+            nn.ReLU(True),
+            # nn.Sigmoid(),
         )
         self.conv_beta = nn.Sequential(
-            nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.Sigmoid(),
+            nn.Conv2d(channel, channel, kernel_size=5, stride=1, padding=2, bias=False),
+            nn.ReLU(True),
+            # nn.Sigmoid(),
         )
 
         self.eps = eps
@@ -43,9 +48,9 @@ class SpatialNorm(nn.Module):
     def forward(self, x):
         norm_x = self.norm(x)
 
-        sh = self.share(x)
-        gamma = self.conv_gamma(sh)
-        beta = self.conv_beta(sh)
+        x_out = self.share(x)
+        gamma = self.conv_gamma(x_out)
+        beta = self.conv_beta(x_out)
 
         print('all mean gamma',torch.mean(gamma))
         print('all mean beta',torch.mean(beta))
@@ -53,7 +58,7 @@ class SpatialNorm(nn.Module):
         print('all mean gamma2',torch.mean(gamma.view(gamma.size(0), -1), 1))
         print('all mean beta2',torch.mean(beta.view(beta.size(0), -1), 1))
 
-        return norm_x * (0.5 + gamma) + (beta - 0.5)
+        return norm_x * (1 + gamma) + beta
 
 class Flatten(nn.Module):
     def forward(self, x):
@@ -63,8 +68,12 @@ class UnFlatten(nn.Module):
     def forward(self, x):
         return x.view(x.size(0), -1, 1, 1)
 
+class ChannelPool(nn.Module):
+    def forward(self, x):
+        return torch.cat((torch.max(x,1)[0].unsqueeze(1), torch.mean(x,1).unsqueeze(1)), dim=1 )
+
 class SpatialNorm2(nn.Module):
-    def __init__(self, channel, norm_type="batch", eps=1e-5):
+    def __init__(self, channel, r=1, norm_type="batch", eps=1e-5):
         super(SpatialNorm2, self).__init__()
 
         if norm_type == 'instance':
@@ -75,40 +84,41 @@ class SpatialNorm2(nn.Module):
         self.channel = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
             Flatten(),
-            nn.Linear(channel, channel),
+            nn.Linear(channel, channel//r),
             nn.ReLU(True),
-            nn.Linear(channel, channel),
+            nn.Linear(channel//r, channel),
+            nn.Sigmoid(),
             UnFlatten(),
         )
-
+        # kernel_size=kernel_size, stride=1, padding=(kernel_size-1) // 2
         self.spatial = nn.Sequential(
-            nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.ReLU(True),
-            nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.ReLU(True),
-            nn.Conv2d(channel, 1, kernel_size=3, stride=1, padding=1, bias=False),
+            ChannelPool(),
+            nn.Conv2d(2, 1, kernel_size=5, stride=1, padding=2, bias=False),
+            nn.BatchNorm2d(1),
+            nn.Sigmoid(),
         )
 
         self.conv_gamma = nn.Sequential(
-            nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.Sigmoid(),
+            nn.Conv2d(channel, channel, kernel_size=1, stride=1, padding=1, bias=False),
+            nn.ReLU(True),
+            # nn.Sigmoid(),
         )
         self.conv_beta = nn.Sequential(
-            nn.Conv2d(channel, channel, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.Sigmoid(),
+            nn.Conv2d(channel, channel, kernel_size=5, stride=1, padding=2, bias=False),
+            nn.ReLU(True),
+            # nn.Sigmoid(),
         )
+
         self.eps = eps
 
     def forward(self, x):
         N,C,H,W = x.size()
         norm_x = self.norm(x)
-        channel = self.channel(x)
-        spatial = self.spatial(x)
+        x_out = self.channel(x)
+        x_out = self.spatial(x_out)
 
-        mapping = torch.ones(N,C,H,W, device="cuda") * channel * spatial
-
-        gamma = self.conv_gamma(mapping)
-        beta = self.conv_beta(mapping)
+        gamma = self.conv_gamma(x_out)
+        beta = self.conv_beta(x_out)
 
         print('all mean gamma',torch.mean(gamma))
         print('all mean beta',torch.mean(beta))
@@ -116,7 +126,7 @@ class SpatialNorm2(nn.Module):
         print('all mean gamma2',torch.mean(gamma.view(gamma.size(0), -1), 1))
         print('all mean beta2',torch.mean(beta.view(beta.size(0), -1), 1))
 
-        return norm_x * (0.5 + gamma) + (beta - 0.5)
+        return norm_x * (1 + gamma) + beta
 
 class BasicBlock(nn.Module):
 
