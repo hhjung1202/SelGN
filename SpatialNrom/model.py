@@ -33,7 +33,7 @@ class SpatialNorm(nn.Module):
         )
 
         self.conv_gamma = nn.Sequential(
-            nn.Conv2d(channel, channel, kernel_size=1, stride=1, padding=1, bias=False),
+            nn.Conv2d(channel, channel, kernel_size=1, stride=1, padding=0, bias=False),
             nn.ReLU(True),
             # nn.Sigmoid(),
         )
@@ -99,7 +99,7 @@ class SpatialNorm2(nn.Module):
         )
 
         self.conv_gamma = nn.Sequential(
-            nn.Conv2d(channel, channel, kernel_size=1, stride=1, padding=1, bias=False),
+            nn.Conv2d(channel, channel, kernel_size=1, stride=1, padding=0, bias=False),
             nn.ReLU(True),
             # nn.Sigmoid(),
         )
