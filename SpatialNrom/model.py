@@ -87,25 +87,24 @@ class SpatialNorm2(nn.Module):
             nn.BatchNorm1d(channel//r),
             nn.ReLU(True),
             nn.Linear(channel//r, channel),
-            nn.BatchNorm1d(channel),
-            nn.ReLU(True),
+            nn.Sigmoid(),
             UnFlatten(),
         )
         # kernel_size=kernel_size, stride=1, padding=(kernel_size-1) // 2
         self.spatial = nn.Sequential(
             ChannelPool(),
             nn.Conv2d(2, 1, kernel_size=5, stride=1, padding=2, bias=False),
-            nn.BatchNorm2d(1),
-            nn.ReLU(True),
+            nn.Sigmoid(),
         )
 
         self.conv_gamma = nn.Sequential(
             nn.Conv2d(channel, channel, kernel_size=1, stride=1, padding=0, bias=False),
-            nn.Sigmoid(),
+            nn.Tanh(),
+            
         )
         self.conv_beta = nn.Sequential(
             nn.Conv2d(channel, channel, kernel_size=5, stride=1, padding=2, bias=False),
-            nn.Sigmoid(),
+            nn.Tanh(),
         )
 
         self.eps = eps
@@ -125,7 +124,7 @@ class SpatialNorm2(nn.Module):
         print('all mean gamma2',torch.mean(gamma.view(gamma.size(0), -1), 1))
         print('all mean beta2',torch.mean(beta.view(beta.size(0), -1), 1))
 
-        return norm_x * gamma + beta
+        return norm_x * (1 + gamma) + beta
 
 class BasicBlock(nn.Module):
 
