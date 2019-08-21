@@ -12,7 +12,7 @@ import dataset
 import math
 
 parser = argparse.ArgumentParser(description='PyTorch Cycle Domain Adaptation Training')
-parser.add_argument('--sd', default='cifar10', type=str, help='source dataset')
+parser.add_argument('--sd', default='cifar100', type=str, help='source dataset')
 parser.add_argument('--td', default='usps', type=str, help='target dataset')
 parser.add_argument('-j', '--workers', default=16, type=int, metavar='N', help='number of data loading workers (default: 4)')
 parser.add_argument('--epoch', default=165, type=int, metavar='N', help='number of total epoch to run')

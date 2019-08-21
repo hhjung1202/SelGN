@@ -16,7 +16,7 @@ def norm2d(out_channels, Method, norm_type="batch", use=False):
         return SpatialNorm2(out_channels, norm_type=norm_type)
 
 class SpatialNorm(nn.Module):
-    def __init__(self, channel, r=1, norm_type="batch", eps=1e-5):
+    def __init__(self, channel, r=4, norm_type="batch", eps=1e-5, case=0):
         super(SpatialNorm, self).__init__()
 
         if norm_type == 'instance':
@@ -43,9 +43,10 @@ class SpatialNorm(nn.Module):
         )
 
         self.eps = eps
+        self.case = case
 
     def forward(self, x):
-        norm_x = self.norm(x)
+        x = self.norm(x)
 
         x_out = self.share(x)
         gamma = self.conv_gamma(x_out)
@@ -57,7 +58,34 @@ class SpatialNorm(nn.Module):
         print('all mean gamma2',torch.mean(gamma.view(gamma.size(0), -1), 1))
         print('all mean beta2',torch.mean(beta.view(beta.size(0), -1), 1))
 
-        return norm_x * gamma + beta
+        return x * (gamma + 0.5) + (beta-0.5)
+        # if self.case is 0:
+        #     return x * gamma + beta
+        # elif  self.case is 1:
+        #     return x * 2 * gamma + beta
+        # elif  self.case is 2:
+        #     return x * (gamma + 0.5) + (beta-0.5)
+        # elif  self.case is 3:
+        #     return x * gamma + (beta-0.5)
+
+
+def getting(x):
+    N,C,W,H = x.size()
+    x_ = x.view(N,C,-1)
+    _, sgmap = torch.max(x_, dim=1)
+    sgmap = torch.FloatTensor(N,C,W*H).zero_().scatter_(1, sgmap.view(N, 1, -1), 1)
+    s_sg = torch.sum(sgmap, dim=2, keepdim=True) + 1e-5
+    print(sgmap)
+    act_map = x_*sgmap
+    print(act_map)
+    s_map = torch.sum(act_map, dim=2, keepdim=True)
+    print(s_map)
+    mean = s_map/s_sg
+    ss_map = torch.sum(act_map**2, dim=2, keepdim=True)
+    var = ss_map/s_sg - mean**2
+    print(mean**2)
+    print(var)
+    print(act_map*var.sqrt() + mean)
 
 class Flatten(nn.Module):
     def forward(self, x):
@@ -72,7 +100,7 @@ class ChannelPool(nn.Module):
         return torch.cat((torch.max(x,1)[0].unsqueeze(1), torch.mean(x,1).unsqueeze(1)), dim=1 )
 
 class SpatialNorm2(nn.Module):
-    def __init__(self, channel, r=1, norm_type="batch", eps=1e-5):
+    def __init__(self, channel, r=4, norm_type="batch", eps=1e-5):
         super(SpatialNorm2, self).__init__()
 
         if norm_type == 'instance':
@@ -111,7 +139,7 @@ class SpatialNorm2(nn.Module):
 
     def forward(self, x):
         N,C,H,W = x.size()
-        norm_x = self.norm(x)
+        x = self.norm(x)
         x_out = x * self.channel(x)
         x_out = x_out * self.spatial(x_out)
 
@@ -124,7 +152,7 @@ class SpatialNorm2(nn.Module):
         print('all mean gamma2',torch.mean(gamma.view(gamma.size(0), -1), 1))
         print('all mean beta2',torch.mean(beta.view(beta.size(0), -1), 1))
 
-        return norm_x * (1 + gamma) + beta
+        return x * (1 + gamma) + beta
 
 class BasicBlock(nn.Module):
 
