@@ -31,6 +31,7 @@ parser.add_argument('--gpu', default='0', type=str, help='Multi GPU ids to use.'
 parser.add_argument('--Method', default='BN', type=str, help='main Method BN|GN|P1|P2')
 parser.add_argument('--Mode', type=int, default=0, help='0: first, 1: last, 2: all, 3: None')
 parser.add_argument('--norm-type', type=str, default='batch', help='batch or instance')
+parser.add_argument('--cls', type=int, default=10, help='num class of dataset')
 
 source_prediction_max_result = []
 target_prediction_max_result = []
@@ -57,7 +58,7 @@ def main():
     train_loader, test_loader, _, _ = dataset_selector(args.sd)
 
     state_info = utils.model_optim_state_info()
-    state_info.model_init(args=args, num_class=10)
+    state_info.model_init(args=args, num_class=args.cls)
     state_info.model_cuda_init()
     # state_info.weight_init()
     state_info.optimizer_init(args)
