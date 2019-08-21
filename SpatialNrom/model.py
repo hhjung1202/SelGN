@@ -159,7 +159,8 @@ class BasicBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride, downsample=None, Method=False, use=False, norm_type="batch"):
         super(BasicBlock, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False)
-        self.norm1 = norm2d(out_channels, Method, use=use, norm_type=norm_type)
+        self.norm1 = nn.BatchNorm2d(out_channels)
+        # self.norm1 = norm2d(out_channels, Method, use=use, norm_type=norm_type)
         self.relu = nn.ReLU(True)
         self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
         self.norm2 = norm2d(out_channels, Method, use=use, norm_type=norm_type)
@@ -168,7 +169,8 @@ class BasicBlock(nn.Module):
         if downsample is not None:
             residual = []
             residual += [nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False)]
-            residual += [norm2d(out_channels, Method, use=use, norm_type=norm_type)]
+            residual += [nn.BatchNorm2d(out_channels)]
+            # residual += [norm2d(out_channels, Method, use=use, norm_type=norm_type)]
             self.downsample = nn.Sequential(*residual)
 
     def forward(self, x):
